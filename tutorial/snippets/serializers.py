@@ -8,13 +8,14 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'username', 'password', 'password2', 'address', 'phone_number']
+        fields = ['user_type', 'email', 'username', 'password', 'password2', 'address', 'phone_number']
         extra_kwargs = {
             'password': {'write_only': True}
         }
 
     def save(self):
         user = User(
+            user_type=self.validated_data['user_type'],
             email=self.validated_data['email'],
             username=self.validated_data['username'],
             address=self.validated_data['address'],
@@ -42,4 +43,4 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = User
-        fields = ('url', 'id', 'username', 'snippets')
+        fields = ('url', 'id', 'username', 'user_type', 'snippets')

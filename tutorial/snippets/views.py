@@ -16,11 +16,37 @@ def registration_view(request):
         serializer = RegistrationSerializer(user, many=True)
         return Response(serializer.data)
 
-
     if request.method == 'POST':
         serializer = RegistrationSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            password = serializer.validated_data['password']
+            password2 = serializer.validated_data['password2']
+            try:
+                email = serializer.validated_data['email']
+            except:
+                email = ""
+            try:
+                address = serializer.validated_data['address']
+            except:
+                address = ""
+            try:
+                phone_number = serializer.validated_data['phone_number']
+            except:
+                phone_number = ""
+
+            if password == password2:
+                user = User(
+                    user_type=serializer.validated_data['user_type'],
+                    email=email,
+                    username=serializer.validated_data['username'],
+                    address=address,
+                    phone_number=phone_number,
+                    password=password
+                )
+
+                user.save()
+            else:
+                return Response("Confirm your password and try again")
         else:
             return Response(serializer.errors)
 

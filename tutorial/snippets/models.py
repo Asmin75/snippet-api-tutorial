@@ -9,21 +9,26 @@ STYLE_CHOICES = sorted((item, item) for item in get_all_styles())
 
 
 class User(AbstractUser):
-    first_name = models.CharField(max_length=20)
-    last_name = models.CharField(max_length=20)
+    USER_TYPE_CHOICES = (
+        (1, 'Admin'),
+        (2, 'staff'),
+        (3, 'user'),
+    )
+    user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES, null=True)
+    first_name = models.CharField(max_length=20, null=True, blank=True)
+    last_name = models.CharField(max_length=20, null=True, blank=True)
     username = models.CharField(max_length=50, unique=True)
-    email = models.EmailField(max_length=100, null=False, unique=True)
+    email = models.EmailField(max_length=100, null=True, blank=True)
     password = models.CharField(max_length=255)
     password2 = models.CharField(max_length=255)
-    address = models.CharField(max_length=20)
-    phone_number = models.CharField(max_length=20)
+    address = models.CharField(max_length=20, null=True, blank=True)
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
 
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['address', 'phone_number']
+    # REQUIRED_FIELDS = ['email', 'user_type', 'address', 'phone_number']
 
     def __str__(self):
-        return self.first_name
-
+        return self.username
 
 
 class Snippet(models.Model):
