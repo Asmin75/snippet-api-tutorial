@@ -10,11 +10,11 @@ STYLE_CHOICES = sorted((item, item) for item in get_all_styles())
 
 class User(AbstractUser):
     USER_TYPE_CHOICES = (
-        (1, 'Admin'),
-        (2, 'staff'),
-        (3, 'user'),
+        ('Admin', 'Admin'),
+        ('Staff', 'Staff'),
+        ('User', 'User'),
     )
-    user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES, null=True)
+    user_type = models.CharField(choices=USER_TYPE_CHOICES, max_length=100, null=True)
     first_name = models.CharField(max_length=20, null=True, blank=True)
     last_name = models.CharField(max_length=20, null=True, blank=True)
     username = models.CharField(max_length=50, unique=True)
@@ -32,6 +32,10 @@ class User(AbstractUser):
 
 
 class Snippet(models.Model):
+    READ_OPTIONS = (
+        ('YES', 'YES'),
+        ('NO', 'NO')
+    )
     created = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=100, blank=True, default='')
     code = models.TextField()
@@ -39,6 +43,7 @@ class Snippet(models.Model):
     language = models.CharField(choices=LANGUAGE_CHOICES, default='python', max_length=100)
     style = models.CharField(choices=STYLE_CHOICES, default='friendly', max_length=100)
     owner = models.ForeignKey(User, related_name='snippets', on_delete=models.CASCADE)
+    is_allowed_to_read = models.CharField(choices=READ_OPTIONS, max_length=50, default='YES')
 
 
     class Meta:

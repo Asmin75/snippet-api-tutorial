@@ -1,11 +1,13 @@
 # from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission
 from rest_framework import generics, permissions
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 from .models import Snippet, User
-from .permissions import IsOwnerOrReadonly
+from .permissions import IsAllowedToWrite, IsAllowedToRead
 from .serializers import SnippetSerializer, UserSerializer, RegistrationSerializer
 
 
@@ -40,10 +42,10 @@ def registration_view(request):
                     email=email,
                     username=serializer.validated_data['username'],
                     address=address,
-                    phone_number=phone_number,
-                    password=password
-                )
+                    phone_number=phone_number
 
+                )
+                user.set_password(password)
                 user.save()
             else:
                 return Response("Confirm your password and try again")
@@ -54,6 +56,7 @@ def registration_view(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def api_root(request):
     return Response({
         'users': reverse('user-list', request=request),
@@ -64,7 +67,7 @@ def api_root(request):
 class SnippetList(generics.ListCreateAPIView):
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadonly,)
+    permission_classes = (permissions.IsAuthenticated, IsAllowedToRead, )
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -73,14 +76,16 @@ class SnippetList(generics.ListCreateAPIView):
 class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadonly,)
+    permission_classes = (permissions.IsAuthenticated, IsAllowedToRead,)
 
 
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (permissions.IsAuthenticated,)
 
 
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (permissions.IsAuthenticated,)
